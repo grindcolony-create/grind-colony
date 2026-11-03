@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Grind Colony – Build daily</title>
+<link rel="icon" href="logo.jpg">
+<meta name="theme-color" content="#0B2A5B">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0B2A5B;--blue:#1E6FD9;--sky:#4FB3F5;--ice:#EEF5FD;--line:#D7E4F4;--red:#E5252A;--yel:#FFC72C;--ink:#0D0D0D;--mut:#5B7090}
+*{box-sizing:border-box;margin:0}
+body{font:16px/1.45 Outfit,system-ui,sans-serif;background:var(--ice);color:var(--navy)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+:focus-visible{outline:3px solid var(--yel);outline-offset:2px}
+.btn{background:var(--ink);color:var(--yel);font-weight:600;padding:11px 20px;border-radius:999px;box-shadow:0 3px 0 var(--red);transition:transform .1s,box-shadow .1s}
+.btn:active{transform:translateY(3px);box-shadow:none}
+.btn.sm{padding:6px 14px}
+.auth{max-width:380px;margin:0 auto;padding:36px 20px;display:grid;gap:14px}
+.auth .lg{width:230px;margin:0 auto;mix-blend-mode:multiply}
+.tabs{display:flex;background:#fff;border-radius:999px;padding:4px;border:1px solid var(--line)}
+.tabs button{flex:1;padding:9px;border-radius:999px;font-weight:600;color:var(--mut)}
+.tabs .on{background:var(--navy);color:#fff}
+label{display:grid;gap:4px;font-weight:500;font-size:14px}
+input,select,textarea{padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;width:100%}
+.err{color:var(--red);min-height:20px;font-size:14px}.note{color:var(--mut);font-size:13px;text-align:center}
+.shell{display:grid;grid-template-columns:230px minmax(0,600px) 260px;gap:24px;justify-content:center;padding:0 16px}
+.side{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px;padding:20px 0}
+.lg2{width:170px;mix-blend-mode:multiply;margin-bottom:14px}
+.nv{text-align:left;padding:12px 16px;border-radius:12px;font-weight:600;font-size:18px}
+.nv.on{background:var(--navy);color:#fff}.nv:hover:not(.on){background:#fff}
+.side .btn{margin-top:14px}
+.mid{padding:20px 0 90px;display:grid;gap:14px;align-content:start}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}
+h1{font-size:26px;font-weight:700}h2{font-size:17px}
+.priv{display:inline-block;background:var(--ink);color:var(--yel);font-size:12px;padding:3px 10px;border-radius:999px;margin-left:8px;vertical-align:middle}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center}
+.stats b{display:block;font-size:30px;line-height:1}.stats span{font-size:13px;color:var(--mut)}
+.comb{margin:14px auto 4px;max-width:340px}
+.r{display:flex;gap:3px;margin-top:-3.2%}.r:first-child{margin-top:0}.r:nth-child(even){padding-left:7%}
+.c{flex:0 0 13%;aspect-ratio:1/1.12;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:var(--line);position:relative}
+.c.l1{background:var(--sky)}.c.l2{background:var(--yel)}
+.c.today::after{content:'';position:absolute;inset:40%;border-radius:50%;background:var(--ink)}
+.hb{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.hb span{flex:1;font-weight:500}.hb small{color:var(--mut)}
+.tick{width:32px;height:36px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:var(--line)}
+.tick.on{background:var(--yel)}.tick.on::after{content:'✓';font-weight:700;color:var(--ink)}
+.x{color:var(--mut);font-size:22px;padding:0 6px}
+.add{display:flex;gap:8px;margin-top:10px}
+.tabs2{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:-4px}
+.tabs2 button{padding:10px 12px;font-weight:600;color:var(--mut);border-bottom:3px solid transparent}
+.tabs2 .on{color:var(--navy);border-color:var(--blue)}
+.comp textarea{border:0;resize:none;min-height:80px;font-size:18px;padding:4px}
+.comp .bar{display:flex;align-items:center;gap:10px;justify-content:space-between}
+.pick{padding:8px 14px;border:1px solid var(--line);border-radius:999px;font-weight:500;font-size:14px;cursor:pointer}
+.th{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}.th div{position:relative}.th img{width:64px;height:64px;object-fit:cover;border-radius:10px}
+.th button{position:absolute;top:-6px;right:-6px;background:var(--ink);color:var(--yel);border-radius:50%;width:20px;height:20px;line-height:20px;font-size:14px}
+.post{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.via{font-size:13px;color:var(--mut);margin:0 0 6px 52px;font-weight:500}
+.row{display:flex;gap:12px}.col{display:flex;flex-direction:column;align-items:center;gap:4px}
+.av{width:40px;height:40px;border-radius:50%;background:var(--navy);color:var(--yel);display:grid;place-items:center;font-weight:700;flex:none}
+.thr{flex:1;width:2px;background:var(--line);border-radius:2px;min-height:10px}
+.bd{flex:1;min-width:0}.bd header{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.role{background:var(--ice);color:var(--blue);font-size:12px;padding:1px 8px;border-radius:6px;font-weight:600}
+time{color:var(--mut);font-size:13px;margin-left:auto}
+.bd>p{margin:4px 0 8px;white-space:pre-wrap;word-wrap:break-word}
+.g{display:grid;gap:3px;border-radius:14px;overflow:hidden;margin-bottom:8px}.g img{width:100%;height:100%;object-fit:cover;aspect-ratio:4/3}
+.g2,.g3,.g4{grid-template-columns:1fr 1fr}.g3 img:first-child{grid-row:span 2;aspect-ratio:auto}
+.acts{display:flex;gap:8px}
+.a{padding:7px 16px;border-radius:999px;font-weight:600;font-size:14px;border:2px solid var(--ink);background:#fff;color:var(--ink)}
+.a.like.on{background:var(--red);border-color:var(--red);color:#fff}
+.a.rs.on{background:var(--yel);border-color:var(--yel)}
+.a.cm.on{background:var(--ink);color:var(--yel)}
+.cms{margin-top:10px;display:grid;gap:6px;font-size:15px}.cin{display:flex;gap:8px}
+.rail{padding-top:28px;position:sticky;top:0;align-self:start;display:grid;gap:14px}
+.empty{text-align:center;color:var(--mut);padding:28px}
+.av img,img.av{object-fit:cover}.fol{padding:2px 12px;border:1.5px solid var(--ink);border-radius:999px;font-size:13px;font-weight:600;color:var(--ink)}.fol.on{background:var(--ink);color:var(--yel)}
+.big{width:84px;height:84px;font-size:32px}.pro{display:flex;gap:16px;align-items:center}
+.nt{display:flex;gap:10px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}.nt:first-child{border:0}.dot{width:9px;height:9px;border-radius:50%;background:var(--red);flex:none}.lnk{color:var(--blue);font-weight:600;text-decoration:underline;justify-self:start}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.seg{display:flex;background:var(--ice);border-radius:999px;padding:3px;margin-bottom:12px}.seg button{flex:1;padding:8px;border-radius:999px;font-weight:600}.seg .on{background:var(--ink);color:var(--yel)}
+.bar{display:grid;grid-template-columns:96px 1fr auto;align-items:center;gap:8px;margin-top:8px;font-size:14px}.bar i{height:10px;border-radius:6px;background:var(--yel);justify-self:start}.stats.sm b{font-size:19px}
+@media(max-width:900px){.shell{grid-template-columns:1fr;padding:0 12px}.rail,.lg2,.side .btn{display:none}
+.side{position:fixed;bottom:0;left:0;right:0;top:auto;height:auto;flex-direction:row;background:#fff;border-top:1px solid var(--line);padding:6px;z-index:5}
+.nv{flex:1;text-align:center;font-size:13px;padding:10px 2px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<div id="app"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+const FB={apiKey:"AIzaSyB1BFfB1fBTdujtquhpcvd_8kachFmZQ2c",authDomain:"grind-colony-7defd.firebaseapp.com",projectId:"grind-colony-7defd",storageBucket:"grind-colony-7defd.firebasestorage.app",messagingSenderId:"530375923026",appId:"1:530375923026:web:99751367e4636f59b6d68b"};
+const LIVE=!!FB.apiKey,$=s=>document.querySelector(s),app=$('#app');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const L=(k,d)=>JSON.parse(localStorage.getItem(k)||d),S=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+let fa,fs,bus=()=>{},nbus=()=>{};
+if(LIVE){firebase.initializeApp(FB);fa=firebase.auth();fs=firebase.firestore()}
+const FV=()=>firebase.firestore.FieldValue;
+const emailOf=async u=>{if(u.includes('@'))return u;const d=await fs.doc('usernames/'+u.toLowerCase()).get();if(!d.exists)throw Error('Username or password is wrong.');return d.data().email};
+const API={
+ async signUp(u,p,role,email){if(LIVE){if((await fs.doc('usernames/'+u.toLowerCase()).get()).exists)throw Error('That username is taken. Try another.');const c=await fa.createUserWithEmailAndPassword(email,p),m={id:c.user.uid,username:u,role,habits:[],following:[],photo:''};await fs.doc('usernames/'+u.toLowerCase()).set({email,uid:m.id});await fs.doc('users/'+m.id).set(m);return m}
+  const us=L('gc_u','{}');if(us[u.toLowerCase()])throw Error('That username is taken. Try another.');
+  const m={id:'u'+Date.now(),username:u,role,email,habits:[],following:[],photo:'',pw:p};us[u.toLowerCase()]=m;S('gc_u',us);S('gc_s',m.id);return m},
+ async signIn(u,p){if(LIVE){const c=await fa.signInWithEmailAndPassword(await emailOf(u),p);return(await fs.doc('users/'+c.user.uid).get()).data()}
+  const m=Object.values(L('gc_u','{}')).find(x=>x.username.toLowerCase()==u.toLowerCase()||(x.email||'').toLowerCase()==u.toLowerCase());if(!m||m.pw!==p)throw Error('Username or password is wrong.');S('gc_s',m.id);return m},
+ restore(){if(LIVE)return new Promise(r=>fa.onAuthStateChanged(async u=>r(u?(await fs.doc('users/'+u.uid).get()).data():null)));
+  return Promise.resolve(Object.values(L('gc_u','{}')).find(m=>m.id===L('gc_s','null'))||null)},
+ saveMe(m){if(LIVE)return fs.doc('users/'+m.id).set(m);const us=L('gc_u','{}');us[m.username.toLowerCase()]=m;S('gc_u',us)},
+ out(){LIVE?fa.signOut():S('gc_s',null)},
+ async reset(u){if(!LIVE)throw Error('Password reset emails work once Firebase is connected.');try{await fa.sendPasswordResetEmail(await emailOf(u))}catch(e){}},
+ watchN(id,cb){if(LIVE)return fs.collection('notes').where('to','==',id).limit(80).onSnapshot(q=>cb(q.docs.map(d=>({id:d.id,...d.data()}))));nbus=()=>cb(L('gc_n','[]').filter(n=>n.to==id));nbus()},
+ note(n){if(LIVE)return fs.collection('notes').add(n);const a=L('gc_n','[]');a.push({...n,id:'n'+Date.now()+Math.random()});S('gc_n',a);nbus()},
+ readAll(ids){if(LIVE){const b=fs.batch();ids.forEach(i=>b.update(fs.doc('notes/'+i),{read:true}));return b.commit()}const a=L('gc_n','[]');a.forEach(n=>{if(ids.includes(n.id))n.read=true});S('gc_n',a);nbus()},
+ watch(cb){if(LIVE)return fs.collection('posts').orderBy('ts','desc').limit(60).onSnapshot(s=>cb(s.docs.map(d=>({id:d.id,...d.data()}))));
+  bus=()=>cb(L('gc_p','[]'));bus()},
+ add(p){if(LIVE)return fs.collection('posts').add(p);const a=L('gc_p','[]');a.unshift({...p,id:'p'+Date.now()});S('gc_p',a);bus()},
+ patch(id,op){if(LIVE){const f=FV(),o={like:f.arrayUnion(op.uid),unlike:f.arrayRemove(op.uid)};
+   return fs.doc('posts/'+id).update(op.k=='c'?{comments:f.arrayUnion(op.c)}:op.k=='r'?{reshares:f.arrayUnion(op.uid)}:{likes:o[op.k]})}
+  const a=L('gc_p','[]'),p=a.find(x=>x.id==id);if(!p)return;
+  if(op.k=='c')p.comments.push(op.c);else if(op.k=='r')p.reshares.push(op.uid);
+  else p.likes=op.k=='like'?[...p.likes,op.uid]:p.likes.filter(x=>x!=op.uid);S('gc_p',a);bus()}
+};
+if(!LIVE&&!localStorage.gc_p)S('gc_p',[
+ {id:'s1',uid:'s',username:'ada_builds',role:'Business owner',text:'Day 41 of sending one customer follow-up before 10am. Revenue is up 12% this month. #BuildDaily',imgs:[],ts:Date.now()-36e5*3,likes:[],reshares:[],comments:[]},
+ {id:'s2',uid:'s',username:'kofi',role:'Student',text:'Finished 3 study blocks today. 9-day streak.',imgs:[],ts:Date.now()-36e5*9,likes:[],reshares:[],comments:[]}]);
+
+let me=null,posts=[],view='hive',flt='all',imgs=[],draft='',open={},mt='out',mode='in',notes=[],unsub=[];
+const dk=d=>new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const back=n=>{const d=new Date();d.setDate(d.getDate()-n);return dk(d)},today=()=>back(0);
+const done=k=>me.habits.filter(h=>h.log[k]).length;
+function streak(){let n=0,i=done(today())?0:1;while(me.habits.length&&done(back(i))){n++;i++}return n}
+function hs(h){let n=0,i=h.log[today()]?0:1;while(h.log[back(i)]){n++;i++}return n}
+const ago=t=>{const m=(Date.now()-t)/6e4;return m<1?'now':m<60?~~m+'m':m<1440?~~(m/60)+'h':~~(m/1440)+'d'};
+const ROLES=['Student','Salary earner','Business owner'];
+const AM=['Drink water first thing','Work out for 20 minutes','Check emails and calendar','Plan your top 3 tasks','Read or learn for 15 minutes','Pray, meditate or reflect','Eat a proper breakfast','Review your goals'];
+const CUR=['USD','EUR','GBP','NGN','GHS','KES','ZAR','EGP','MAD','XOF','UGX','TZS','RWF','ETB','INR','PKR','BDT','AED','SAR','CAD','AUD','NZD','BRL','MXN','CNY','JPY','SGD','PHP','IDR','TRY','CHF'];
+const OUT=['Food','Transport','Bills','Rent','Business costs','Learning','Savings','Other'],INC=['Salary','Business sales','Side income','Gift','Other'];
+let fx=L('gc_fx','null');
+if(!fx||Date.now()-fx.t>864e5)fetch('https://open.er-api.com/v6/latest/USD').then(r=>r.json()).then(j=>{if(j.rates){fx={t:Date.now(),r:j.rates};S('gc_fx',fx);if(me&&view=='money'&&!document.activeElement.matches('input,textarea,select'))draw()}}).catch(()=>{});
+const cv=(a,f,t)=>f==t?a:(fx&&fx.r[f]&&fx.r[t])?a/fx.r[f]*fx.r[t]:null;
+const fmt=(n,c)=>{try{return new Intl.NumberFormat(undefined,{style:'currency',currency:c}).format(n)}catch(e){return c+' '+n.toFixed(2)}};
+const mo=()=>me.money||(me.money={base:'USD',tx:[]});
+const fl=()=>me.following||[],av=(n,ph,c='')=>ph?`<img class="av ${c}" src="${ph}" alt="">`:`<b class="av ${c}">${esc(n[0].toUpperCase())}</b>`;
+const ping=(p,type)=>p.uid!=me.id&&API.note({to:p.uid,from:me.id,fromName:me.username,type,postId:p.id,ts:Date.now(),read:false});
+const mark=()=>{const u=notes.filter(n=>!n.read).map(n=>n.id);if(u.length)API.readAll(u)};
+
+function authView(){return`<main class="auth"><img class="lg" src="logo.jpg" alt="Grind Colony">
+<div class="tabs"><button data-a="mode" data-v="in" class="${mode=='in'?'on':''}">Sign in</button><button data-a="mode" data-v="up" class="${mode=='up'?'on':''}">Create account</button></div>
+<label>${mode=='in'?'Username or email':'Username'}<input id="u" autocomplete="username" maxlength="${mode=='in'?60:20}"></label>${mode=='up'?'<label>Email (used to reset your password)<input id="e" type="email" autocomplete="email"></label>':''}
+<label>Password<input id="p" type="password" autocomplete="${mode=='in'?'current-password':'new-password'}"></label>
+${mode=='up'?`<label>I am a<select id="r">${ROLES.map(r=>`<option>${r}</option>`).join('')}</select></label>`:''}
+<p class="err" role="alert"></p>${mode=='in'?'<button class="lnk" data-a="forgot">Forgot password?</button>':''}<button class="btn" data-a="go">${mode=='in'?'Sign in':'Create account'}</button>
+<p class="note">${LIVE?'Your habits stay private. You choose what to share.':'Demo mode: data stays in this browser.'}</p></main>`}
+
+function hiveView(){const rem=AM.filter(x=>!me.habits.some(h=>h.name==x)),t=today(),n=me.habits.length,d=done(t),w=[...Array(7)].reduce((a,_,i)=>a+done(back(i)),0);
+ const cells=[...Array(28)].map((_,i)=>{const k=back(27-i),c=done(k);return`<i class="c l${!n||!c?0:c<n?1:2} ${k==t?'today':''}" title="${k}"></i>`});
+ return`<div><h1>My hive<span class="priv">Only you see this</span></h1></div>
+<div class="card"><div class="stats"><div><b>${d}/${n}</b><span>done today</span></div><div><b>${streak()}</b><span>day streak</span></div><div><b>${n?Math.round(w/(n*7)*100):0}%</b><span>this week</span></div></div>
+<div class="comb" aria-label="Last 28 days">${[0,1,2,3].map(r=>`<div class="r">${cells.slice(r*7,r*7+7).join('')}</div>`).join('')}</div>
+<p class="note">Honey cell = every habit done. Blue = some. Dot = today.</p></div>
+<div class="card"><h2>Morning routine</h2><p class="note" style="text-align:left;margin:4px 0 10px">Tap to add. Win the first hour and the day follows.</p>${rem.length?`<div class="chips">${rem.map(x=>`<button class="pick" data-a="am" data-v="${esc(x)}">+ ${esc(x)}</button>`).join('')}</div><button class="btn sm" data-a="amall" style="margin-top:12px">Add full routine</button>`:'<p class="note" style="text-align:left">Full routine added. Tick them off each morning.</p>'}</div>
+<div class="card"><h2>Today’s habits</h2>${n?me.habits.slice().sort((a,b)=>!!b.am-!!a.am).map(h=>`<div class="hb"><button class="tick ${h.log[t]?'on':''}" data-a="tick" data-v="${h.id}" aria-label="Mark ${esc(h.name)} done"></button><span>${esc(h.name)}${h.am?' <em class="role">Morning</em>':''}</span><small>${hs(h)}d</small><button class="x" data-a="del" data-v="${h.id}" aria-label="Remove ${esc(h.name)}">×</button></div>`).join(''):'<p class="empty">No habits yet. Add the first one you will repeat daily.</p>'}
+<div class="add"><input id="nh" maxlength="50" placeholder="e.g. Study 2 hours, Save ₦1,000, Call 5 leads"><button class="btn sm" data-a="add">Add habit</button></div></div>
+<button class="btn" data-a="share">Share today’s progress</button>`}
+
+function postView(p){const lk=(p.likes||[]).includes(me.id),rs=(p.reshares||[]).includes(me.id),cm=p.comments||[];
+ return`<article class="post">${p.via?`<div class="via">⟲ ${esc(p.via)} reshared</div>`:''}<div class="row"><div class="col">${av(p.username,p.uid==me.id?me.photo:p.ph)}<i class="thr"></i></div><div class="bd">
+<header><strong>${esc(p.username)}</strong><span class="role">${esc(p.role)}</span>${p.uid!=me.id?`<button class="fol ${fl().includes(p.uid)?'on':''}" data-a="fol" data-v="${p.uid}">${fl().includes(p.uid)?'Following':'Follow'}</button>`:''}<time>${ago(p.ts)}</time></header><p>${esc(p.text)}</p>
+${p.imgs&&p.imgs.length?`<div class="g g${p.imgs.length}">${p.imgs.map(s=>`<img src="${s}" alt="Progress photo">`).join('')}</div>`:''}
+<div class="acts"><button class="a like ${lk?'on':''}" data-a="like" data-v="${p.id}">♥ ${(p.likes||[]).length}</button><button class="a rs ${rs?'on':''}" data-a="rs" data-v="${p.id}">⟲ ${(p.reshares||[]).length}</button><button class="a cm ${open[p.id]?'on':''}" data-a="cm" data-v="${p.id}">Comment ${cm.length}</button></div>
+${open[p.id]?`<div class="cms">${cm.map(c=>`<div><b>${esc(c.u)}</b> ${esc(c.t)}</div>`).join('')}<div class="cin"><input id="c${p.id}" maxlength="280" placeholder="Write a comment"><button class="btn sm" data-a="send" data-v="${p.id}">Post</button></div></div>`:''}</div></div></article>`}
+
+function colonyView(){const f=posts.filter(p=>flt=='all'||(flt=='fol'&&(fl().includes(p.uid)||fl().includes(p.by)))||(flt=='path'&&p.role==me.role)||(flt=='mine'&&(p.by||p.uid)==me.id));
+ return`<div class="tabs2">${[['all','Everyone'],['fol','Following'],['path','My path'],['mine','Mine']].map(([k,t])=>`<button class="${flt==k?'on':''}" data-a="flt" data-v="${k}">${t}</button>`).join('')}</div>
+<div class="card comp"><textarea id="d" maxlength="500" placeholder="What did you build today?">${esc(draft)}</textarea>
+<div class="th">${imgs.map((s,i)=>`<div><img src="${s}" alt=""><button data-a="rm" data-v="${i}" aria-label="Remove photo">×</button></div>`).join('')}</div>
+<div class="bar"><label class="pick" ${imgs.length>=4?'hidden':''}>Add photos (${imgs.length}/4)<input id="f" type="file" accept="image/*" multiple hidden></label><button class="btn sm" data-a="post">Post progress</button></div></div>
+${f.length?f.map(postView).join(''):`<p class="empty">${flt=='fol'?'Follow people from their posts to fill this feed.':'Nothing here yet. Share the first win.'}</p>`}`}
+
+function meView(){return`<div class="card"><div class="pro">${av(me.username,me.photo,'big')}<div><h1>${esc(me.username)}</h1>
