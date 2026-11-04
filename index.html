@@ -181,4 +181,65 @@ function colonyView(){const f=posts.filter(p=>flt=='all'||(flt=='fol'&&(fl().inc
 <div class="bar"><label class="pick" ${imgs.length>=4?'hidden':''}>Add photos (${imgs.length}/4)<input id="f" type="file" accept="image/*" multiple hidden></label><button class="btn sm" data-a="post">Post progress</button></div></div>
 ${f.length?f.map(postView).join(''):`<p class="empty">${flt=='fol'?'Follow people from their posts to fill this feed.':'Nothing here yet. Share the first win.'}</p>`}`}
 
-function meView(){return`<div class="card"><div class="pro">${av(me.username,me.photo,'big')}<div><h1>${esc(me.username)}</h1>
+function meView(){return`<div class="card"><div class="pro">${av(me.username,me.photo,'big')}<div><h1>${esc(me.username)}</h1><span class="role">${esc(me.role)}</span><p class="note" style="text-align:left">Following ${fl().length}</p></div></div>
+<p style="margin:12px 0"><label class="pick" style="display:inline-block">${me.photo?'Change photo':'Add profile photo'}<input id="pf" type="file" accept="image/*" hidden></label></p>
+<p class="note" style="text-align:left;margin-bottom:10px">Your hive is private. Only posts you share appear in the colony.</p><button class="btn sm" data-a="out">Sign out</button></div>`+posts.filter(p=>(p.by||p.uid)==me.id).map(postView).join('')}
+function moneyView(){const m=mo(),b=m.base,mon=today().slice(0,7),tx=m.tx.filter(x=>x.d.slice(0,7)==mon);let inc=0,out=0,miss=0;const cats={};
+ tx.forEach(x=>{const v=cv(x.a,x.c,b);if(v==null){miss++;return}if(x.t=='in')inc+=v;else{out+=v;cats[x.k]=(cats[x.k]||0)+v}});
+ const top=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,5),opt=a=>a.map(c=>`<option>${c}</option>`).join('');
+ return`<h1>Money<span class="priv">Only you see this</span></h1>
+<div class="card"><label>My main currency<select id="bc">${CUR.map(c=>`<option ${c==b?'selected':''}>${c}</option>`).join('')}</select></label>
+<div class="stats sm" style="margin-top:14px"><div><b>${fmt(inc,b)}</b><span>earned this month</span></div><div><b>${fmt(out,b)}</b><span>spent</span></div><div><b>${fmt(inc-out,b)}</b><span>left</span></div></div>
+${miss?`<p class="note" style="margin-top:8px">${miss} entries in other currencies are not counted yet. They need live exchange rates, which could not load.</p>`:''}
+${top.map(([k,v])=>`<div class="bar"><span>${esc(k)}</span><i style="width:${Math.max(4,Math.round(v/out*100))}%"></i><b>${fmt(v,b)}</b></div>`).join('')}</div>
+<div class="card"><div class="seg"><button class="${mt=='out'?'on':''}" data-a="mt" data-v="out">Spent</button><button class="${mt=='in'?'on':''}" data-a="mt" data-v="in">Earned</button></div>
+<div class="add"><input id="ma" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Amount"><select id="mc">${CUR.map(c=>`<option ${c==b?'selected':''}>${c}</option>`).join('')}</select></div>
+<div class="add"><select id="mk">${opt(mt=='out'?OUT:INC)}</select><input id="mn" maxlength="60" placeholder="Note (optional)"></div>
+<button class="btn" style="margin-top:12px" data-a="madd">Add ${mt=='out'?'spending':'income'}</button></div>
+<div class="card"><h2>Recent entries</h2>${m.tx.length?[...m.tx].reverse().slice(0,30).map(x=>`<div class="hb"><span>${esc(x.k)}${x.n?': '+esc(x.n):''}<br><small>${x.d}</small></span><b style="color:${x.t=='in'?'var(--blue)':'var(--red)'}">${x.t=='in'?'+':'−'}${fmt(x.a,x.c)}</b><button class="x" data-a="mdel" data-v="${x.id}" aria-label="Delete entry">×</button></div>`).join(''):'<p class="empty">No entries yet. Add what you earn and spend, in any currency.</p>'}</div>
+<p class="note"><a href="https://www.exchangerate-api.com" target="_blank" rel="noopener">Rates By Exchange Rate API</a>, updated daily.</p>`}
+function alertsView(){const T={like:'liked your post',reshare:'reshared your post',comment:'commented on your post',follow:'started following you'},a=[...notes].sort((x,y)=>y.ts-x.ts);
+ return`<h1>Alerts</h1><div class="card">${a.length?a.map(n=>`<div class="nt">${n.read?'':'<i class="dot"></i>'}<span style="flex:1"><b>${esc(n.fromName)}</b> ${T[n.type]||'sent an alert'}</span><time>${ago(n.ts)}</time></div>`).join(''):'<p class="empty">No alerts yet. Likes, reshares, comments and new followers show up here.</p>'}</div>`}
+ function draw(){if(!me){app.innerHTML=authView();return}
+ const un=notes.filter(n=>!n.read).length,body=view=='hive'?hiveView():view=='colony'?colonyView():view=='alerts'?alertsView():view=='money'?moneyView():meView();
+ app.innerHTML=`<div class="shell"><nav class="side"><img class="lg2" src="logo.jpg" alt="Grind Colony">${[['hive','My hive'],['colony','Colony'],['alerts','Alerts'+(un?` (${un})`:'')],['money','Money'],['me','Profile']].map(([k,t])=>`<button class="nv ${view==k?'on':''}" data-a="view" data-v="${k}">${t}</button>`).join('')}<button class="btn" data-a="share">Share progress</button></nav>
+<section class="mid">${body}</section><aside class="rail"><div class="card"><h2>Colony today</h2><p class="note" style="text-align:left">${posts.filter(p=>Date.now()-p.ts<864e5).length} progress posts in the last 24 hours.</p></div><div class="card"><h2>Daily question</h2><p>What is the one thing you will finish before tonight?</p></div></aside></div>`}
+
+function start(){unsub.forEach(f=>f&&f());unsub=[];if(!me){posts=[];notes=[];return}
+ const idle=()=>!document.activeElement.matches('input,textarea');
+ unsub=[API.watch(p=>{posts=p;if(me&&view!='hive'&&idle())draw()}),API.watchN(me.id,n=>{notes=n;if(me&&idle())draw()})]}
+async function boot(){me=await API.restore();start();draw()}
+const bad=e=>{const m=(e.code||'').startsWith('auth/')?(e.code=='auth/email-already-in-use'?'That email already has an account.':e.code=='auth/weak-password'?'Password needs at least 6 characters.':'Username or password is wrong.'):e.message,el=$('.err');el?(el.style.color='',el.textContent=m):alert(m)};
+const img=(f,m=800)=>new Promise(r=>{const i=new Image;i.onload=()=>{const k=Math.min(1,m/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);r(c.toDataURL('image/jpeg',.6))};i.src=URL.createObjectURL(f)});
+document.addEventListener('input',e=>{if(e.target.id=='d')draft=e.target.value});
+document.addEventListener('change',async e=>{if(e.target.id=='bc'){mo().base=e.target.value;await API.saveMe(me);draw();return}if(e.target.id=='pf'){me.photo=await img(e.target.files[0],160);await API.saveMe(me);draw();return}if(e.target.id!='f')return;for(const f of[...e.target.files].slice(0,4-imgs.length))imgs.push(await img(f));draw()});
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,v=b.dataset.v;
+ try{switch(a){
+ case'mode':mode=v;draw();break;
+ case'go':{const u=$('#u').value.trim(),p=$('#p').value;if(mode=='up'&&!/^[a-z0-9_]{3,20}$/i.test(u))throw Error('Username: 3–20 letters, numbers or _.');if(mode=='up'&&!/^\S+@\S+\.\S+$/.test($('#e').value.trim()))throw Error('Enter a valid email so you can reset your password.');if(p.length<6)throw Error('Password needs at least 6 characters.');
+  me=await API[mode=='up'?'signUp':'signIn'](u,p,$('#r')&&$('#r').value,$('#e')&&$('#e').value.trim());view='hive';start();draw();break}
+ case'view':if(view=='alerts'&&v!='alerts')mark();view=v;draw();break;
+ case'tick':{const h=me.habits.find(x=>x.id==v),t=today();h.log[t]?delete h.log[t]:h.log[t]=1;await API.saveMe(me);draw();break}
+ case'del':me.habits=me.habits.filter(x=>x.id!=v);await API.saveMe(me);draw();break;
+ case'add':{const n=$('#nh').value.trim();if(!n)break;me.habits.push({id:Date.now()+'',name:n,log:{}});await API.saveMe(me);draw();break}
+ case'share':draft=`Today: ${done(today())}/${me.habits.length} habits done. ${streak()}-day streak. #BuildDaily`;view='colony';flt='all';draw();break;
+ case'flt':flt=v;draw();break;
+ case'rm':imgs.splice(v,1);draw();break;
+ case'post':if(!draft.trim()&&!imgs.length)break;await API.add({uid:me.id,username:me.username,role:me.role,ph:me.photo||'',text:draft.trim(),imgs,ts:Date.now(),likes:[],reshares:[],comments:[]});draft='';imgs=[];draw();break;
+ case'like':{const p=posts.find(x=>x.id==v),on=(p.likes||[]).includes(me.id);await API.patch(v,{k:on?'unlike':'like',uid:me.id});if(!on)ping(p,'like');break}
+ case'rs':{const p=posts.find(x=>x.id==v);if((p.reshares||[]).includes(me.id))break;const o=p.of||p.id;
+  await API.patch(o,{k:'r',uid:me.id});if(o!=p.id)await API.patch(p.id,{k:'r',uid:me.id});
+  ping(p,'reshare');await API.add({uid:p.uid,username:p.username,role:p.role,ph:p.ph||'',text:p.text,imgs:p.imgs||[],via:me.username,by:me.id,of:o,ts:Date.now(),likes:[],reshares:[],comments:[]});break}
+ case'cm':open[v]=!open[v];draw();break;
+ case'send':{const t=$('#c'+v).value.trim();if(t){open[v]=true;const p=posts.find(x=>x.id==v);await API.patch(v,{k:'c',c:{u:me.username,t,ts:Date.now()}});ping(p,'comment')}break}
+ case'am':me.habits.push({id:Date.now()+'',name:v,log:{},am:1});await API.saveMe(me);draw();break;
+ case'amall':{AM.filter(x=>!me.habits.some(h=>h.name==x)).forEach((x,i)=>me.habits.push({id:Date.now()+'-'+i,name:x,log:{},am:1}));await API.saveMe(me);draw();break}
+ case'mt':mt=v;draw();break;
+ case'madd':{const a=parseFloat($('#ma').value);if(!(a>0))throw Error('Enter an amount above 0.');mo().tx.push({id:Date.now()+'',t:mt,a,c:$('#mc').value,k:$('#mk').value,n:$('#mn').value.trim(),d:today()});await API.saveMe(me);draw();break}
+ case'mdel':mo().tx=mo().tx.filter(x=>x.id!=v);await API.saveMe(me);draw();break;
+ case'forgot':{const u=$('#u').value.trim();if(!u)throw Error('Type your username or email first.');await API.reset(u);const e=$('.err');e.style.color='var(--blue)';e.textContent='If that account exists, a reset link is on its way.';break}
+ case'fol':{const on=fl().includes(v);me.following=on?fl().filter(x=>x!=v):[...fl(),v];await API.saveMe(me);if(!on)API.note({to:v,from:me.id,fromName:me.username,type:'follow',ts:Date.now(),read:false});draw();break}
+ case'out':API.out();me=null;start();draw();break}}catch(x){bad(x)}});
+boot();
+</script></body></html>
+ 
