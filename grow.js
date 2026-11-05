@@ -1,0 +1,67 @@
+(()=>{
+document.head.insertAdjacentHTML('beforeend','<style>.ov{position:fixed;inset:0;z-index:40;background:rgba(11,42,91,.85);display:grid;place-items:center;padding:16px}.ovc{background:#fff;border-radius:20px;padding:20px;max-width:380px;width:100%;max-height:88vh;overflow:auto;display:grid;gap:12px}.vb{background:#FFF3C4;border:1px solid var(--yel);border-radius:14px;padding:10px 14px;font-size:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.vb span{flex:1}.pbar{height:10px;border-radius:6px;background:var(--ice);overflow:hidden;margin-top:4px}.pbar i{display:block;height:100%;background:var(--blue)}.pbar.warn i{background:var(--yel)}.pbar.over i{background:var(--red)}</style>');
+const save=async()=>{await API.saveMe(me);draw()};
+function ov(h){const o=document.createElement('div');o.className='ov';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.innerHTML='<div class="ovc">'+h+'</div>';document.body.appendChild(o);return o}
+const LG={terms:['Terms of use',['Grind Colony helps you build daily habits and share progress. By using it you agree to these terms.','Be kind. Do not post hate, harassment, threats, adult content, scams, spam or anything illegal. Do not share other people’s private information or photos without permission.','Posts, comments and photos you share are visible to other signed-in members. You are responsible for what you post. You can delete a post within 24 hours.','We may remove content or accounts that break these rules. You can report posts and block people.','The app is provided as is. Habit and money tools are for personal tracking only and are not financial, medical or professional advice.']],
+privacy:['Privacy',['Your habits, reminders, money entries, goals and budgets are private and visible only to you.','Your username, path, public profile photo, posts, comments, likes and reposts are visible to other signed-in members.','We store your email, username and data using Google Firebase. The site is hosted on Cloudflare. Exchange rates come from a public rates service.','To ask us to delete your account or data, email grindcolony@gmail.com.','We do not sell your data.']]};
+function legal(k){const[t,ps]=LG[k],o=ov(`<h2>${t}</h2>${ps.map(p=>`<p style="font-size:14px">${p}</p>`).join('')}<button class="btn" id="lc">Close</button>`);o.onclick=e=>{if(e.target==o||e.target.id=='lc')o.remove()}}
+const PK={'Student':['Study for 2 focused hours','Read for 45 minutes','Sleep before 11pm'],'Salary earner':['Learn one skill for 1 hour','Do the most important task first','Plan tomorrow before bed'],'Business owner':['Follow up with 3 customers','Review sales and expenses','Record every sale and cost']};
+function onboard(){const L=PK[me.role]||PK.Student,pick=new Set(L);let step=1,time='07:00';const o=ov(''),box=o.firstChild;o.id='onb';
+ const R=()=>{box.innerHTML=step==1?`<h2>Welcome! Step 1 of 3</h2><p>Pick the habits you want to start with.</p>${L.map(x=>`<label class="sw"><input type="checkbox" value="${esc(x)}" ${pick.has(x)?'checked':''} style="width:auto"> ${esc(x)}</label>`).join('')}<button class="btn" id="n1">Next</button><button class="lnk" id="nx" style="justify-self:center">Skip for now</button>`
+  :step==2?`<h2>Step 2 of 3</h2><p>When should we remind you? Your first habit will ring at this time.</p><input type="time" id="ot" value="${time}" aria-label="Reminder time"><button class="btn" id="n2">Next</button>`
+  :`<h2>Step 3 of 3</h2><p>Say hello to the Colony.</p><textarea id="og" rows="3" maxlength="200">Starting my journey today. #BuildDaily</textarea><button class="btn" id="n3">Finish and post</button><button class="lnk" id="n4" style="justify-self:center">Finish without posting</button>`};
+ R();
+ box.onchange=e=>{if(e.target.type=='checkbox')e.target.checked?pick.add(e.target.value):pick.delete(e.target.value)};
+ box.onclick=async e=>{const i=e.target.id;
+  if(i=='n1'){step=2;R()}else if(i=='n2'){time=box.querySelector('#ot').value||'';step=3;R()}
+  else if(i=='nx'){me.onb=1;o.remove();save()}
+  else if(i=='n3'||i=='n4'){const tx=i=='n3'?box.querySelector('#og').value.trim():'';[...pick].forEach((n,k)=>me.habits.push(Object.assign({id:Date.now()+'-'+k,name:n,log:{}},k==0&&time?{t:time}:{})));me.onb=1;o.remove();
+   if(tx)try{await API.add({uid:me.id,username:me.username,role:me.role,ph:'',text:tx,imgs:[],ts:Date.now(),likes:[],reshares:[],comments:[]})}catch(x){}
+   save()}}}
+const CH={'Student':['Study Sprint','Study for 2 focused hours'],'Salary earner':['Skill Week','Learn one skill for 1 hour'],'Business owner':['Follow-up Week','Follow up with 3 customers']};
+const dayKey=(s,i)=>{const d=new Date(s+'T00:00:00');d.setDate(d.getDate()+i);return dk(d)};
+function chProg(){const c=me.ch;if(!c)return null;const h=me.habits.find(x=>x.name==c.h),day=Math.round((new Date(today()+'T00:00:00')-new Date(c.s+'T00:00:00'))/864e5)+1;if(!h)return{n:0,day,fail:true};
+ const ks=[...Array(7)].map((_,i)=>dayKey(c.s,i));return{n:ks.filter(k=>h.log[k]).length,day,fail:ks.some((k,i)=>i<day-1&&!h.log[k])||day>7&&ks.some(k=>!h.log[k])}}
+function chDone(){const c=me.ch;if(!c||c.fin)return;const p=chProg();if(p&&p.n>=7){me.ch.fin=1;API.saveMe(me);const o=ov('<h2>Challenge complete! 🏆</h2><p>You finished the 7-day challenge. Be proud of that.</p><button class="btn" id="lc">Great</button>');o.onclick=e=>{if(e.target==o||e.target.id=='lc')o.remove()};navigator.vibrate&&navigator.vibrate([100,50,100])}}
+let ht='today';const _h9=hiveView,_m9=moneyView,_pv9=postView,_me9=meView,_cv9=colonyView,_au9=authView;
+hiveView=function(){let h=_h9();const d=CH[me.role]||CH.Student,p=chProg();
+ const ch=`<div class="card"><h2>🏆 ${d[0]}: 7-day challenge</h2>${!p?`<p class="note" style="text-align:left;margin:6px 0">Do “${d[1]}” every day for 7 days.</p><button class="btn sm" data-a="chj">Join the challenge</button>`:p.n>=7?`<p style="margin:6px 0">Completed! 🏆</p><button class="pick" data-a="chj">Start again</button>`:p.fail?`<p style="margin:6px 0">You missed a day. Restart and go again.</p><button class="btn sm" data-a="chj">Restart</button>`:`<p style="margin:6px 0">Day ${Math.min(p.day,7)} of 7. ${p.n} done.</p><div class="pbar" role="progressbar" aria-label="Challenge progress" aria-valuenow="${p.n}" aria-valuemin="0" aria-valuemax="7"><i style="width:${p.n/7*100}%"></i></div>`}</div>`;
+ h=h.replace('<div class="card"><div class="stats">',ch+'<div class="card"><div class="stats">');
+ const parts=h.split(/(?=<div class="card")/),head=parts.shift();let share='';
+ const keep=parts.map(c=>{const m=c.match(/<button class="btn" data-a="share">[^<]*<\/button>/);if(m){c=c.replace(m[0],'');share=m[0]}return c});
+ const tab=c=>/Morning routine|Starter habits/.test(c)?'add':/Your last 7 days|Habit calendar/.test(c)?'prog':'today';
+ const tabs=`<div class="tabs2" role="tablist">${[['today','Today'],['add','Add habits'],['prog','Progress']].map(([k,t])=>`<button role="tab" aria-selected="${ht==k}" class="${ht==k?'on':''}" data-a="ht" data-v="${k}">${t}</button>`).join('')}</div>`;
+ return head+tabs+keep.filter(c=>tab(c)==ht).join('')+(ht=='today'?share:'')};
+moneyView=function(){let h=_m9();const m=mo(),b=m.base,mon=today().slice(0,7),spent={};let saved=0;
+ m.tx.forEach(x=>{if(x.t!='out')return;const v=cv(x.a,x.c,b);if(v==null)return;if(x.d.slice(0,7)==mon)spent[x.k]=(spent[x.k]||0)+v;if(x.k=='Savings')saved+=v});
+ const g=me.goal,bud=me.bud||{};
+ const gh=g?`<div style="margin-top:8px"><div style="display:flex;justify-content:space-between;gap:8px"><b>${esc(g.name)}</b><span>${fmt(saved,b)} / ${fmt(g.target,b)}</span></div><div class="pbar" role="progressbar" aria-label="Goal progress" aria-valuenow="${Math.min(100,Math.round(saved/g.target*100))}" aria-valuemin="0" aria-valuemax="100"><i style="width:${Math.min(100,saved/g.target*100)}%"></i></div></div>`:'<p class="note" style="text-align:left">Set a savings goal. Spending entries in the Savings category count toward it.</p>';
+ const bl=Object.entries(bud).map(([k,l])=>{const s=spent[k]||0,p=s/l*100;return`<div style="margin-top:10px"><div style="display:flex;justify-content:space-between;gap:8px"><span>${esc(k)}</span><span>${fmt(s,b)} / ${fmt(l,b)}</span></div><div class="pbar ${p>=100?'over':p>=80?'warn':''}" role="progressbar" aria-label="${esc(k)} budget" aria-valuenow="${Math.round(Math.min(p,100))}" aria-valuemin="0" aria-valuemax="100"><i style="width:${Math.min(100,p)}%"></i></div><small>${p>=100?'Over budget. ':p>=80?'Almost at your limit. ':''}</small><button class="lnk" data-a="bdel" data-v="${esc(k)}" style="font-size:12px">Remove</button></div>`}).join('');
+ const card=`<div class="card"><h2>Goals and budgets</h2>${gh}<button class="pick" data-a="gset" style="margin:8px 0">${g?'Change goal':'Set a goal'}</button><h2 style="margin-top:12px">Monthly budgets</h2>${bl||'<p class="note" style="text-align:left">No budgets yet.</p>'}<div class="add"><select id="bgc" aria-label="Category">${OUT.map(c=>`<option>${esc(c)}</option>`).join('')}</select><input id="bga" type="number" inputmode="decimal" min="1" placeholder="Monthly limit" aria-label="Monthly limit"><button class="btn sm" data-a="bset">Set</button></div></div>`;
+ if(mt=='out'&&!OUT.includes('Savings'))h=h.replace('<select id="mk">','<select id="mk"><option>Savings</option>');
+ return h.replace('<div class="card"><h2>Money calendar</h2>',card+'<div class="card"><h2>Money calendar</h2>')};
+postView=function(p){if((me.blocked||[]).includes(p.uid))return'';const h=_pv9(p);if(p.via||p.uid==me.id)return h;return h.replace(/(<div class="acts">[\s\S]*?)(<\/div>)/,'$1<button class="lnk" data-a="rpt" data-v="'+p.id+'" style="font-size:12px;margin-left:auto">Report</button>$2')};
+meView=function(){let h=_me9();
+ if(/Profile settings/.test(h))return h.replace('<div class="card"><h2>Account</h2>',`<div class="card"><h2>Safety and legal</h2><div class="chips" style="margin-top:8px"><button class="pick" data-a="legal" data-v="terms">Terms of use</button><button class="pick" data-a="legal" data-v="privacy">Privacy</button></div><p class="note" style="text-align:left;margin-top:8px">Blocked people: ${(me.blocked||[]).length}. Open a person’s page to block or unblock them.</p></div><div class="card"><h2>Account</h2>`);
+ return h.replace(/(<button class="fol[^"]*" data-a="fol" data-v="([^"]+)">[^<]*<\/button>)/,(m,a,u)=>a+` <button class="pick" data-a="blk" data-v="${u}">${(me.blocked||[]).includes(u)?'Unblock':'Block'}</button>`)};
+authView=function(){const h=_au9();return mode=='up'?h.replace('<button class="btn" data-a="go">','<p class="note">By creating an account you agree to the <button class="lnk" data-a="legal" data-v="terms">Terms</button> and <button class="lnk" data-a="legal" data-v="privacy">Privacy</button>.</p><button class="btn" data-a="go">'):h};
+if(LIVE){const _su=API.signUp;API.signUp=async(...a)=>{const m=await _su(...a);try{fa.currentUser.sendEmailVerification()}catch(e){}return m}}
+function vbar(){const m=document.querySelector('.mid');if(!m)return;
+ if(LIVE&&fa.currentUser&&!fa.currentUser.emailVerified)m.insertAdjacentHTML('afterbegin','<div class="vb" role="status"><span>Please verify your email to keep your account safe.</span><button class="pick" data-a="vsend">Send link</button><button class="pick" data-a="vdone">I verified</button></div>');
+ const t=today();if(me.habits.length&&new Date().getHours()>=20&&done(t)==0&&streak()>0){m.insertAdjacentHTML('afterbegin','<div class="vb" role="status"><span>Your '+streak()+'-day streak is at risk. One habit keeps it alive.</span></div>')}}
+const _d10=draw;
+draw=function(){_d10();if(!me)return;if(!me.onb&&me.habits.length==0&&!document.getElementById('onb'))onboard();vbar();chDone()};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a="legal"]');if(b)legal(b.dataset.v)});
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-a]');if(!b||!me)return;const a=b.dataset.a,v=b.dataset.v;
+ if(a=='ht'){ht=v;draw()}
+ else if(a=='vsend')fa.currentUser.sendEmailVerification().then(()=>alert('Verification link sent. Check your inbox and spam folder.')).catch(()=>alert('Please wait a minute and try again.'))
+ else if(a=='vdone')fa.currentUser.reload().then(()=>{draw();if(!fa.currentUser.emailVerified)alert('Not verified yet.')})
+ else if(a=='chj'){const d=CH[me.role]||CH.Student;if(!me.habits.some(x=>x.name==d[1]))me.habits.push({id:Date.now()+'',name:d[1],log:{}});me.ch={s:today(),h:d[1]};save()}
+ else if(a=='gset'){const n=prompt('Goal name (for example, New laptop)');if(!n)return;const t=parseFloat(prompt('Target amount in '+mo().base));if(t>0){me.goal={name:n.trim().slice(0,40),target:t};save()}}
+ else if(a=='bset'){const c=$('#bgc').value,x=parseFloat($('#bga').value);if(x>0){me.bud=Object.assign({},me.bud,{[c]:x});save()}}
+ else if(a=='bdel'){const o=Object.assign({},me.bud);delete o[v];me.bud=o;save()}
+ else if(a=='blk'){const l=me.blocked||[];me.blocked=l.includes(v)?l.filter(x=>x!=v):l.concat(v);save()}
+ else if(a=='rpt'){const p=posts.find(x=>x.id==v),r=prompt('Why are you reporting this post? (spam, abuse, hate, other)');if(!r||!r.trim())return;
+  try{await fs.collection('reports').add({by:me.id,pid:v,puid:p?p.uid:'',reason:r.trim().slice(0,200),ts:Date.now()});alert('Thank you. We will review it.');if(p&&confirm('Also block this person?')){me.blocked=(me.blocked||[]).concat(p.uid);save()}}catch(x){alert('Could not send the report. Try again.')}}});
+if(me){draw()}else if(app.firstChild)draw();
+})();
