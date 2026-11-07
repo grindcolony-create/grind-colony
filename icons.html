@@ -1,0 +1,7 @@
+<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Icons</title>
+<body style="font:16px system-ui;padding:20px;text-align:center"><h2>Grind Colony icons</h2><p>Tap each button to download, then upload both files to GitHub.</p><div id=o></div>
+<script>
+const im=new Image();im.onload=()=>[192,512].forEach(n=>{const c=document.createElement('canvas');c.width=c.height=n;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,n,n);x.drawImage(im,0,0,n,n);
+c.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='icon-'+n+'.png';a.textContent='Download icon-'+n+'.png';a.style.cssText='display:block;margin:14px;padding:14px;background:#0D0D0D;color:#FFC72C;border-radius:99px;text-decoration:none;font-weight:700';document.getElementById('o').append(a)})});
+im.src='logo.jpg';
+</script>
