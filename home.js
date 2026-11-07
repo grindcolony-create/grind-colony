@@ -22,7 +22,7 @@ const _d12=draw;
 draw=function(){if(!me){sbl=false;SB=new Set()}
  if(me&&me.role==OLD&&ROLES.includes(PRO)){me.role=PRO;API.saveMe(me)}
  const first=me&&!landed;_d12();
- if(first){landed=true;if(view=='colony'){view='hive';_d12()}}
+ if(first)landed=true;
  if(me)loadSB()};
 setInterval(()=>{if(!me||!me.tasks)return;const t=today(),n=nowM();me.tasks.forEach(x=>{if(x.done||!x.time||x.due!=t)return;const late=n-mins(x.time);if(late<0||late>120||(trep[x.id]||0)>Date.now())return;trep[x.id]=Date.now()+12e4;beep();alert('Task due: '+x.t);
  if('Notification'in window&&Notification.permission=='granted'){try{navigator.serviceWorker.ready.then(r=>r.showNotification('Grind Colony',{body:'Task due: '+x.t,icon:'logo.jpg',tag:x.id,renotify:true}))}catch(e){}}})},2e4);
@@ -36,7 +36,7 @@ const goBack=()=>{const ov=document.querySelector('.ov,[role=dialog],[role=alert
  if(view=='post'||view=='user'){const b=q('[data-a="sback"],[data-a="pback"]');if(b){b.click();return true}}
  if(view=='money'&&q('[data-a="jb"]')){q('[data-a="jb"]').click();return true}
  if(q('[data-a="rclose"]')){q('[data-a="rclose"]').click();return true}
- if(view!='hive'){view='hive';draw();return true}
+ if(view!='colony'){view='colony';draw();return true}
  return false};
 document.addEventListener('click',()=>{if(!armed){armed=true;history.replaceState({gc:'base'},'');history.pushState({gc:'app'},'')}},{capture:true});
 addEventListener('popstate',()=>{if(!armed)return;if(goBack()){history.pushState({gc:'app'},'');return}
