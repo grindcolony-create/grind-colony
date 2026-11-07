@@ -1,5 +1,5 @@
 (()=>{
-Professionals
+const CT='Professionals';
 if(!ROLES.includes(CT))ROLES.push(CT);
 const isC=()=>me&&me.role==CT,FVx=()=>firebase.firestore.FieldValue;
 document.head.insertAdjacentHTML('beforeend','<style>.tst{position:fixed;left:12px;right:12px;bottom:84px;z-index:60;background:#0D0D0D;color:#FFC72C;border-radius:14px;padding:12px 14px;font:600 14px system-ui;box-shadow:0 3px 0 #E5252A}.ac{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}.ac .pick{min-height:36px}.jc{width:100%;text-align:left;display:block}.sm2{font-size:13px;color:var(--mut)}.ns{background:var(--ice);border-radius:10px;padding:8px 10px;margin-top:6px;font-size:14px}.up{background:var(--navy);color:#fff;border-radius:14px;padding:10px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.up span{flex:1}</style>');
