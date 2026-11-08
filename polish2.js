@@ -31,7 +31,7 @@ colonyView=function(){let s='';const un=notes.filter(n=>!n.read).length;
  if(un)s+=`<div class="nb red"><span><b>${un} new alert${un>1?'s':''}</b><br><small>See who reacted, replied or followed you.</small></span><button class="btn sm" data-a="view" data-v="alerts">Open</button></div>`;
  if(!me.habits.length)s+=`<div class="nb"><span><b>Start your hive</b><br><small>Add one habit and begin your streak.</small></span><button class="btn sm" data-a="view" data-v="hive">Add habit</button></div>`;
  return s+_c15()};
-meView=function(){return _me15().replace('<div class="card"><h2>Account</h2>','<div class="card"><h2>App check</h2><p class="note" style="text-align:left;margin:6px 0">Checks that every part of the app is installed correctly.</p><button class="pick" data-a="chk">Run app check</button></div><div class="card"><h2>Account</h2>')};
+meView=function(){if(location.hash!='#check')return _me15();return _me15().replace('<div class="card"><h2>Account</h2>','<div class="card"><h2>App check</h2><p class="note" style="text-align:left;margin:6px 0">Checks that every part of the app is installed correctly.</p><button class="pick" data-a="chk">Run app check</button></div><div class="card"><h2>Account</h2>')};
 document.addEventListener('click',e=>{if(e.target.closest('[data-a="chk"]'))check()});
 draw=function(){_d15();if(me)icons()};
 if(me){draw()}else if(app.firstChild)draw();
